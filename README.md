@@ -2,7 +2,7 @@
 
 We propose a round-efficient 3PC framework ALKAID for Boolean circuits through improved multi-input AND gate. By mixing correlations and redundancy, we propose a concretely efficient correlation generation approach for small input bits $N\le 4$ and shift the correlation generation to the preprocessing phase. Building on this, we create a round-efficient AND protocol for general cases with $N>4$. Exploiting the improved multi-input AND gates, we design fast depth-optimized parallel prefix adder and share conversion primitives in 3PC, achieved with new techniques and optimizations for better concrete efficiency.  We further apply these optimized primitives to enhance the efficiency of secure non-linear functions in machine learning. 
 
-This repo contains a proof-of-concept implementation for our paper [ALKAID](https://eprint.iacr.org/2025/2298) {\bf AND SHOULD NOT BE USED IN PRODUCTION}.
+This repo contains a proof-of-concept implementation for our paper [ALKAID](https://eprint.iacr.org/2025/2298).
 
 ## 1. Setup
 Follow the [README of SecretFlow-SPU](https://github.com/secretflow/spu) to set up the backend.
