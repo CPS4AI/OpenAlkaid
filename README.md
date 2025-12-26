@@ -36,5 +36,6 @@ bazel build //examples/alkaid/benchmark:pumabm --jobs 32
   journal={IEEE Transactions on Information Forensics and Security}, 
   title={ALKAID: Accelerating Three-Party Boolean Circuits by Mixing Correlations and Redundancy}, 
   year={2025},
-  doi={10.1109/TIFS.2025.3648188}}
+  doi={10.1109/TIFS.2025.3648188}
+}
 ```
