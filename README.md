@@ -31,11 +31,10 @@ bazel build //examples/alkaid/benchmark:pumabm --jobs 32
 
 ## 3. Citing
 ```text
-@misc{cryptoeprint:2025/2298,
-      author = {Ye Dong and Xudong Chen and Xiangfu Song and Yaxi Yang and Wen-jie Lu and Tianwei Zhang and Jianying Zhou and Jin-Song Dong},
-      title = {{ALKAID}: Accelerating Three-Party Boolean Circuits by Mixing Correlations and Redundancy},
-      howpublished = {Cryptology {ePrint} Archive, Paper 2025/2298},
-      year = {2025},
-      url = {https://eprint.iacr.org/2025/2298}
-}
+@ARTICLE{11314596,
+  author={Dong, Ye and Chen, Xudong and Song, Xiangfu and Yang, Yaxi and Lu, Wen-jie and Zhang, Tianwei and Zhou, Jianying and Dong, Jin-Song},
+  journal={IEEE Transactions on Information Forensics and Security}, 
+  title={ALKAID: Accelerating Three-Party Boolean Circuits by Mixing Correlations and Redundancy}, 
+  year={2025},
+  doi={10.1109/TIFS.2025.3648188}}
 ```
