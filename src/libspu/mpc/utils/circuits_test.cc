@@ -112,17 +112,17 @@ TEST(KoggeStoneAdder, Vectorized) {
   EXPECT_THAT(r0, testing::ElementsAreArray(args[2].begin(), args[2].end()));
 }
 
-TEST(SklanskyAdder, Scalar) {
+TEST(KSAdder, Scalar) {
   using T = uint32_t;
   const auto cbb = makeScalarCBB<T>();
   const size_t nbits = sizeof(T) * 8;
 
   for (auto item : kU32Add) {
-    EXPECT_EQ(sklansky(cbb, item[0], item[1], nbits), item[2]);
+    EXPECT_EQ(koggle_stone(cbb, item[0], item[1], nbits), item[2]);
   }
 }
 
-TEST(SklanskyAdder, Vectorized) {
+TEST(KSAdder, Vectorized) {
   using T = uint32_t;
   const size_t nbits = sizeof(T) * 8;
   using VT = std::vector<T>;
@@ -135,7 +135,7 @@ TEST(SklanskyAdder, Vectorized) {
   }
 
   auto cbb = makeVectorCBB<VT>();
-  auto r1 = sklansky(cbb, args[0], args[1], nbits);
+  auto r1 = koggle_stone(cbb, args[0], args[1], nbits);
   EXPECT_THAT(r1, testing::ElementsAreArray(args[2].begin(), args[2].end()));
 }
 

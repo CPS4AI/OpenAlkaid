@@ -457,7 +457,7 @@ NdArrayRef AddBB::proc(KernelEvalContext* ctx, const NdArrayRef& lhs,
   const auto y = makeBShare(y_val, y_mac, field, nbits);
 
   auto cbb = MakeSPDZBasicBlock(ctx->sctx());
-  // sklansky has more local computation which leads to lower performance.
+  // koggle_stone has more local computation which leads to lower performance.
   auto res = wrap_kogge_stone(cbb, x, y, nbits);
 
   return res;
@@ -472,7 +472,7 @@ NdArrayRef AddBP::proc(KernelEvalContext* ctx, const NdArrayRef& lhs,
   const auto& y = rhs;
 
   auto cbb = MakeSPDZBasicBlock(ctx->sctx());
-  // sklansky has more local computation which leads to lower performance.
+  // koggle_stone has more local computation which leads to lower performance.
   return wrap_kogge_stone(cbb, x, y, nbits);
 }
 
