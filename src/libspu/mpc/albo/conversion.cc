@@ -638,7 +638,7 @@ uint64_t SelectAndRotate(uint64_t x, uint64_t mask, uint64_t stride) {
 }
 
 template <typename NativeCppType, size_t share_number, typename ShareT>
-std::array<NdArrayRef, 4> sklanky_split(const NdArrayRef& signal,
+std::array<NdArrayRef, 4> koggle_stone_split(const NdArrayRef& signal,
                                         size_t layer) {
   static std::array<uint64_t, 3> pattern = {
       0x1111111111111111ull,  // layer 1
@@ -1335,7 +1335,7 @@ NdArrayRef PPAFromABY2(KernelEvalContext* ctx, const NdArrayRef& x,
   });
 }
 
-NdArrayRef PPASklanky(KernelEvalContext* ctx, const NdArrayRef& x,
+NdArrayRef PPAKS(KernelEvalContext* ctx, const NdArrayRef& x,
                       const NdArrayRef& y, bool output_ass = true) {
   const auto numel = x.numel();
   const size_t in_nbits = std::max(x.eltype().as<BShrTyMrss>()->nbits(),
@@ -1384,16 +1384,16 @@ NdArrayRef PPASklanky(KernelEvalContext* ctx, const NdArrayRef& x,
     pforeach(0, numel,
              [&](int64_t idx) { _out[idx][0] = _p[idx][0] ^ _p[idx][1]; });
 
-    // Sklanky PPA.
+    // koggle_stone PPA.
     // Level 0. Use 4 fan-in and 1 outputs cell.
     {
-      // if (comm->getRank() == 0) std::cout << "eq: Level 0 of the PPASklanky.
+      // if (comm->getRank() == 0) std::cout << "eq: Level 0 of the PPAKS.
       // nbits=" << g.eltype().as<BShrTyMrss>()->nbits() << std::endl;
 
-      auto gops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(g, 0);
-      auto pops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(p, 0);
+      auto gops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(g, 0);
+      auto pops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(p, 0);
 
-      // if (comm->getRank() == 0) std::cout << "eq: Run sklanky_split
+      // if (comm->getRank() == 0) std::cout << "eq: Run koggle_stone_split
       // successfully. nbits=" << gops[0].eltype().as<BShrTyMrss>()->nbits() <<
       // std::endl;
 
@@ -1441,11 +1441,11 @@ NdArrayRef PPASklanky(KernelEvalContext* ctx, const NdArrayRef& x,
 
     // Level 1. Use 4 fan-in and 1 output cell.
     {
-      // if (comm->getRank() == 0) std::cout << "eq: Level 1 of the PPASklanky.
+      // if (comm->getRank() == 0) std::cout << "eq: Level 1 of the PPAKS.
       // nbits=" << g.eltype().as<BShrTyMrss>()->nbits() << std::endl;
 
-      auto gops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(g, 1);
-      auto pops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(p, 1);
+      auto gops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(g, 1);
+      auto pops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(p, 1);
       for (size_t i = 0; i < 4; i++) {
         gops[i] =
             bit_split_2<BShrTyMrss, 3>(bit_split_2<BShrTyMrss, 3>(gops[i]));
@@ -1483,11 +1483,11 @@ NdArrayRef PPASklanky(KernelEvalContext* ctx, const NdArrayRef& x,
 
     // Level 2. Use 4 fan-in and 1 output cell.
     {
-      // if (comm->getRank() == 0) std::cout << "eq: Level 2 of the PPASklanky.
+      // if (comm->getRank() == 0) std::cout << "eq: Level 2 of the PPAKS.
       // nbits=" << g.eltype().as<BShrTyMrss>()->nbits() << std::endl;
 
-      auto gops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(g, 2);
-      auto pops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(p, 2);
+      auto gops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(g, 2);
+      auto pops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(p, 2);
 
       for (size_t i = 0; i < 4; i++) {
         gops[i] =
@@ -1631,7 +1631,7 @@ NdArrayRef A2BMultiFanIn(KernelEvalContext* ctx, const NdArrayRef& in) {
       }
     });
 
-    auto ppa_result = PPASklanky(ctx, m, n);
+    auto ppa_result = PPAKS(ctx, m, n);
 #ifdef ALKAID_PACK_SINGLE_BIT
     out = bitwise_vmap_by_byte<BShrTy, 1, BShrTyMrss, 3>(
         ppa_result, [&](NdArrayRef x) { return ResharingAss2Mrss(ctx, x); });
@@ -1797,7 +1797,7 @@ NdArrayRef B2AMultiFanIn(KernelEvalContext* ctx, const NdArrayRef& in) {
         }
       }
 
-      auto ppa_result = PPASklanky(ctx, in, dabit_b);
+      auto ppa_result = PPAKS(ctx, in, dabit_b);
 
       // if (comm->getRank() == 0) std::cout << "PPA: generate signal c." <<
       // std::endl; if (comm->getRank() == 0) std::cout << "PPA: signal c." <<
@@ -1878,7 +1878,7 @@ NdArrayRef PPATest(KernelEvalContext* ctx, const NdArrayRef& in) {
       _n[idx][2] = _in[idx][2];
     });
 
-    auto ppa_result = PPASklanky(ctx, m, n);
+    auto ppa_result = PPAKS(ctx, m, n);
 #ifdef ALKAID_PACK_SINGLE_BIT
     auto out = bitwise_vmap_by_byte<BShrTy, 1, BShrTyMrss, 3>(
         ppa_result, [&](NdArrayRef x) { return ResharingAss2Mrss(ctx, x); });
@@ -1889,7 +1889,7 @@ NdArrayRef PPATest(KernelEvalContext* ctx, const NdArrayRef& in) {
   });
 }
 
-NdArrayRef PPASklankyForBitwidth16(KernelEvalContext* ctx, const NdArrayRef& x,
+NdArrayRef PPAKSForBitwidth16(KernelEvalContext* ctx, const NdArrayRef& x,
                                    const NdArrayRef& y) {
   const auto numel = x.numel();
   const size_t in_nbits = std::max(x.eltype().as<BShrTyMrss>()->nbits(),
@@ -1938,16 +1938,16 @@ NdArrayRef PPASklankyForBitwidth16(KernelEvalContext* ctx, const NdArrayRef& x,
     pforeach(0, numel,
              [&](int64_t idx) { _out[idx][0] = _p[idx][0] ^ _p[idx][1]; });
 
-    // Sklanky PPA.
+    // koggle_stone PPA.
     // Level 0. Use 4 fan-in and 1 outputs cell.
     {
-      // if (comm->getRank() == 0) std::cout << "eq: Level 0 of the PPASklanky.
+      // if (comm->getRank() == 0) std::cout << "eq: Level 0 of the PPAKS.
       // nbits=" << g.eltype().as<BShrTyMrss>()->nbits() << std::endl;
 
-      auto gops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(g, 0);
-      auto pops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(p, 0);
+      auto gops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(g, 0);
+      auto pops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(p, 0);
 
-      // if (comm->getRank() == 0) std::cout << "eq: Run sklanky_split
+      // if (comm->getRank() == 0) std::cout << "eq: Run koggle_stone_split
       // successfully. nbits=" << gops[0].eltype().as<BShrTyMrss>()->nbits() <<
       // std::endl;
 
@@ -1995,11 +1995,11 @@ NdArrayRef PPASklankyForBitwidth16(KernelEvalContext* ctx, const NdArrayRef& x,
 
     // Level 1. Use 4 fan-in and 1 output cell.
     {
-      // if (comm->getRank() == 0) std::cout << "eq: Level 1 of the PPASklanky.
+      // if (comm->getRank() == 0) std::cout << "eq: Level 1 of the PPAKS.
       // nbits=" << g.eltype().as<BShrTyMrss>()->nbits() << std::endl;
 
-      auto gops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(g, 1);
-      auto pops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(p, 1);
+      auto gops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(g, 1);
+      auto pops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(p, 1);
       for (size_t i = 0; i < 4; i++) {
         gops[i] =
             bit_split_2<BShrTyMrss, 3>(bit_split_2<BShrTyMrss, 3>(gops[i]));
@@ -2021,7 +2021,7 @@ NdArrayRef PPASklankyForBitwidth16(KernelEvalContext* ctx, const NdArrayRef& x,
       // << _g[1][0] << std::endl;
     }
 
-    // if (comm->getRank() == 0) std::cout << "eq: Finish the PPASklanky." <<
+    // if (comm->getRank() == 0) std::cout << "eq: Finish the PPAKS." <<
     // std::endl;
 
     out = AssXor2(ctx, g, out);
@@ -2362,7 +2362,7 @@ NdArrayRef A2BMultiFanInForBitwidth16(KernelEvalContext* ctx,
     }
   });
 
-  auto ppa_result = PPASklankyForBitwidth16(ctx, m, n);
+  auto ppa_result = PPAKSForBitwidth16(ctx, m, n);
 #ifdef ALKAID_PACK_SINGLE_BIT
   out = bitwise_vmap_by_byte<BShrTy, 1, BShrTyMrss, 3>(
       ppa_result, [&](NdArrayRef x) { return ResharingAss2Mrss(ctx, x); });
@@ -2523,7 +2523,7 @@ NdArrayRef B2AMultiFanInForBitwidth16(KernelEvalContext* ctx,
       }
     }
 
-    auto ppa_result = PPASklankyForBitwidth16(ctx, dabit_b, dabit_b);
+    auto ppa_result = PPAKSForBitwidth16(ctx, dabit_b, dabit_b);
 
     // if (comm->getRank() == 0) std::cout << "PPA: generate signal c." <<
     // std::endl; if (comm->getRank() == 0) std::cout << "PPA: signal c." <<
@@ -2596,7 +2596,7 @@ NdArrayRef PPATestForBitwidth16(KernelEvalContext* ctx, const NdArrayRef& in) {
     _n[idx][2] = _in[idx][2];
   });
 
-  auto ppa_result = PPASklankyForBitwidth16(ctx, m, n);
+  auto ppa_result = PPAKSForBitwidth16(ctx, m, n);
 #ifdef ALKAID_PACK_SINGLE_BIT
   auto out = bitwise_vmap_by_byte<BShrTy, 1, BShrTyMrss, 3>(
       ppa_result, [&](NdArrayRef x) { return ResharingAss2Mrss(ctx, x); });

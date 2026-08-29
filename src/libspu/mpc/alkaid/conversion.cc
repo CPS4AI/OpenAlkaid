@@ -856,7 +856,7 @@ uint64_t SelectAndRotate(uint64_t x, uint64_t mask, uint64_t stride) {
 }
 
 template <typename NativeCppType, size_t share_number, typename ShareT>
-std::array<NdArrayRef, 4> sklanky_split(const NdArrayRef& signal,
+std::array<NdArrayRef, 4> koggle_stone_split(const NdArrayRef& signal,
                                         size_t layer) {
   static std::array<uint64_t, 3> pattern = {
       0x1111111111111111ull,  // layer 1
@@ -1528,7 +1528,7 @@ NdArrayRef PPAFromABY2(KernelEvalContext* ctx, const NdArrayRef& x,
   });
 }
 
-NdArrayRef PPASklanky(KernelEvalContext* ctx, const NdArrayRef& x,
+NdArrayRef PPAKS(KernelEvalContext* ctx, const NdArrayRef& x,
                       const NdArrayRef& y) {
   const auto numel = x.numel();
   const size_t in_nbits = std::max(x.eltype().as<BShrTyMrss>()->nbits(),
@@ -1582,8 +1582,8 @@ NdArrayRef PPASklanky(KernelEvalContext* ctx, const NdArrayRef& x,
     // p3, p2, p1, p0 -> p3 & p2 & p1 & p0, p2 & p1 & p0, p1 & p0, p0
     // g works in the same way.
     {
-      auto gops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(g, 0);
-      auto pops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(p, 0);
+      auto gops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(g, 0);
+      auto pops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(p, 0);
 
       for (size_t i = 0; i < 4; i++) {
         gops[i] =
@@ -1624,8 +1624,8 @@ NdArrayRef PPASklanky(KernelEvalContext* ctx, const NdArrayRef& x,
     // p3, p2, p1, p0 -> p3 & p2 & p1 & p0
     // g works in the same way.
     {
-      auto gops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(g, 1);
-      auto pops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(p, 1);
+      auto gops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(g, 1);
+      auto pops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(p, 1);
       for (size_t i = 0; i < 4; i++) {
         gops[i] =
             bit_split_2<BShrTyMrss, 3>(bit_split_2<BShrTyMrss, 3>(gops[i]));
@@ -1665,8 +1665,8 @@ NdArrayRef PPASklanky(KernelEvalContext* ctx, const NdArrayRef& x,
     // p3, p2, p1, p0 -> p3 & p2 & p1 & p0
     // g works in the same way.
     {
-      auto gops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(g, 2);
-      auto pops = sklanky_split<bshr_el_t, 3, BShrTyMrss>(p, 2);
+      auto gops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(g, 2);
+      auto pops = koggle_stone_split<bshr_el_t, 3, BShrTyMrss>(p, 2);
 
       for (size_t i = 0; i < 4; i++) {
         gops[i] =
@@ -1813,7 +1813,7 @@ NdArrayRef A2BMultiFanIn(KernelEvalContext* ctx, const NdArrayRef& in) {
       }
     });
 
-    auto ppa_result = PPASklanky(ctx, m, n);
+    auto ppa_result = PPAKS(ctx, m, n);
 #ifdef ALKAID_PACK_SINGLE_BIT
     out = bitwise_vmap_by_byte<BShrTy, 1, BShrTy, 2>(
         ppa_result, [&](NdArrayRef x) { return ResharingAss2Rss(ctx, x); });
@@ -1989,7 +1989,7 @@ NdArrayRef B2AMultiFanIn(KernelEvalContext* ctx, const NdArrayRef& in) {
         }
 
         auto ppa_result =
-            ResharingAss2Rss(ctx, PPASklanky(ctx, in_mss, dabit_b));
+            ResharingAss2Rss(ctx, PPAKS(ctx, in_mss, dabit_b));
         NdArrayView<rss_shr_t> _z(ppa_result);
 
         pforeach(0, numel, [&](int64_t idx) {

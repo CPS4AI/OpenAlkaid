@@ -96,7 +96,7 @@ T kogge_stone(const CircuitBasicBlock<T>& ctx, T const& lhs, T const& rhs,
 }
 
 template <typename T>
-T sklansky(const CircuitBasicBlock<T>& ctx, T const& lhs, T const& rhs,
+T koggle_stone(const CircuitBasicBlock<T>& ctx, T const& lhs, T const& rhs,
            size_t nbits) {
   constexpr std::array<uint128_t, 7> kKeepMasks = {{
       yacl::MakeUint128(0x5555555555555555, 0x5555555555555555),
